@@ -1,6 +1,6 @@
-export const GRID_W = 6
+export const GRID_W = 4
 
-export const GRID_D = 6
+export const GRID_D = 4
 
 export const GRID_H = 12
 

@@ -1,16 +1,18 @@
-import { GRID_W , GRID_D } from './constants.js'
+import { GRID_W , GRID_D , GRID_H } from './constants.js'
 
 import * as glMatrix from './gl-matrix/index.js'
+
+const defaultZoom = Math.max( GRID_W , GRID_H ) / 2 + 1
 
 export const cam = {
 
   yaw: 30 * Math.PI / 180 ,
 
-  pitch: -30 * Math.PI / 180 ,
+  pitch: -20 * Math.PI / 180 ,
 
   roll: 0 ,
 
-  zoom: GRID_W * 1.5 ,
+  zoom: defaultZoom ,
 
   mode: 'ortho' ,
 
@@ -48,7 +50,18 @@ export const cam = {
 
     const center = [ 0 , 0 , 0 ]
 
-    const up = [ 0 , 1 , 0 ]
+    let up = [ 0 , 1 , 0 ]
+
+    // Apply roll: rotate up vector around view direction
+    if ( this.roll !== 0 ) {
+      let viewDir = [ -ex , -ey , -ez ]
+      glMatrix.vec3.normalize( viewDir , viewDir )
+      let rotMat = glMatrix.mat4.create()
+      glMatrix.mat4.fromRotation( rotMat , this.roll , viewDir )
+      let up4 = [ 0 , 1 , 0 , 0 ]
+      glMatrix.vec4.transformMat4( up4 , up4 , rotMat )
+      up = [ up4[ 0 ] , up4[ 1 ] , up4[ 2 ] ]
+    }
 
     glMatrix.mat4.lookAt( this.view , eye , center , up )
 
