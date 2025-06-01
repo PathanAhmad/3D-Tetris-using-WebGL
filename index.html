@@ -3,28 +3,291 @@
 <head>
   <title>3D Tetris</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-    #glcanvas {
-      display: block;
-      position: absolute;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
+    body {
+      background: linear-gradient(133deg, #101025 0%, #1b1b2f 50%, #16213e 100%);
+      font-family: BlinkMacSystemFont, -apple-system, sans-serif;
     }
   </style>
 </head>
 
-<body>
-  <canvas id="glcanvas" width="800" height="800"></canvas>
+<body style="margin: 0; padding: 0; width: 100vw; height: 100vh; display: flex; flex-direction: row; overflow: hidden; box-sizing: border-box;">
+  <div style="flex: 1 1 0; height: 100vh; background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%); display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <canvas id="glcanvas" width="800" height="800" style="width: 100%; max-width: 100%; height: auto; aspect-ratio: 1 / 1; display: block; border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);"></canvas>
+  </div>
+  
+  <div id="controls-panel" style="width: 320px; min-width: 320px; height: 100vh; background: linear-gradient(180deg, #1e1e2e 0%, #2a2a3e 100%); color: #e8e8f0; padding: 12px; font-family: 'Inter', sans-serif; box-shadow: -4px 0 20px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1); box-sizing: border-box;">
+    
+    <div style="text-align: center; margin-bottom: 12px;">
+      <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600; background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">3D Tetris</h2>
+    </div>
+    
+    <div style="margin-bottom: 10px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <div style="font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; color: #f0f0f5;">Lighting</div>
+      <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 6px; align-items: center; font-size: 0.7rem;">
+        <span style="color: #d0d0e0;">Ambient</span>
+        <input id="ambient-slider" type="range" min="0" max="1" step="0.01" value="0.2" style="width: 100%; height: 3px; background: linear-gradient(90deg, #333 0%, #64b5f6 100%); border-radius: 2px; outline: none; -webkit-appearance: none;">
+        <span style="color: #d0d0e0;">Diffuse</span>
+        <input id="diffuse-slider" type="range" min="0" max="1" step="0.01" value="0.7" style="width: 100%; height: 3px; background: linear-gradient(90deg, #333 0%, #64b5f6 100%); border-radius: 2px; outline: none; -webkit-appearance: none;">
+        <span style="color: #d0d0e0;">Specular</span>
+        <input id="specular-slider" type="range" min="0" max="1" step="0.01" value="0.3" style="width: 100%; height: 3px; background: linear-gradient(90deg, #333 0%, #64b5f6 100%); border-radius: 2px; outline: none; -webkit-appearance: none;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+      <div style="padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 0.8rem; font-weight: 500; margin-bottom: 6px; color: #f0f0f5; text-align: center;">Move</div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+          <button class="key-btn" data-key="w" style="width: 24px; height: 24px; background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">W</button>
+          <div style="display: flex; gap: 2px;">
+            <button class="key-btn" data-key="a" style="width: 24px; height: 24px; background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">A</button>
+            <button class="key-btn" data-key="s" style="width: 24px; height: 24px; background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">S</button>
+            <button class="key-btn" data-key="d" style="width: 24px; height: 24px; background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">D</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 0.8rem; font-weight: 500; margin-bottom: 6px; color: #f0f0f5; text-align: center;">Actions</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
+          <button class="key-btn" data-key=" " style="padding: 4px 2px; background: linear-gradient(135deg, #ffd54f 0%, #ffca28 100%); border: none; border-radius: 4px; color: #333; font-size: 0.6rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; line-height: 1.1;">Drop<br>Space</button>
+          <button class="key-btn" data-key="p" style="padding: 4px 2px; background: linear-gradient(135deg, #ef5350 0%, #f44336 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.6rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; line-height: 1.1;">Pause<br>P</button>
+          <button class="key-btn" data-key="g" style="padding: 4px 2px; background: linear-gradient(135deg, #26a69a 0%, #00897b 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.6rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; grid-column: span 2; line-height: 1.1;">Grid (G)</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 10px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+      <div style="font-size: 0.8rem; font-weight: 500; margin-bottom: 6px; color: #f0f0f5; text-align: center;">Rotation</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+        <div style="text-align: center;">
+          <div style="font-size: 0.65rem; color: #ff7043; margin-bottom: 2px;">X</div>
+          <div style="display: flex; gap: 1px;">
+            <button class="key-btn" data-key="x" style="flex: 1; padding: 3px; background: linear-gradient(135deg, #ff7043 0%, #ff5722 100%); border: none; border-radius: 3px; color: #fff; font-size: 0.55rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">x</button>
+            <button class="key-btn" data-key="X" style="flex: 1; padding: 3px; background: linear-gradient(135deg, #ff7043 0%, #ff5722 100%); border: none; border-radius: 3px; color: #fff; font-size: 0.55rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">X</button>
+          </div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.65rem; color: #66bb6a; margin-bottom: 2px;">Y</div>
+          <div style="display: flex; gap: 1px;">
+            <button class="key-btn" data-key="y" style="flex: 1; padding: 3px; background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%); border: none; border-radius: 3px; color: #fff; font-size: 0.55rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">y</button>
+            <button class="key-btn" data-key="Y" style="flex: 1; padding: 3px; background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%); border: none; border-radius: 3px; color: #fff; font-size: 0.55rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">Y</button>
+          </div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.65rem; color: #ab47bc; margin-bottom: 2px;">Z</div>
+          <div style="display: flex; gap: 1px;">
+            <button class="key-btn" data-key="z" style="flex: 1; padding: 3px; background: linear-gradient(135deg, #ab47bc 0%, #9c27b0 100%); border: none; border-radius: 3px; color: #fff; font-size: 0.55rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">z</button>
+            <button class="key-btn" data-key="Z" style="flex: 1; padding: 3px; background: linear-gradient(135deg, #ab47bc 0%, #9c27b0 100%); border: none; border-radius: 3px; color: #fff; font-size: 0.55rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease;">Z</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; min-height: 0;">
+      <!-- I kinda packed all the camera controls in here, so it's a bit much -->
+      <div style="font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: #f0f0f5; text-align: center;">Camera</div>
+      
+      <div style="font-size: 0.7rem; color: #90caf9; font-weight: 500; margin-bottom: 3px; text-align: center;">Rotation</div>
+
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 12px;">
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+
+          <div style="display: flex; flex-direction: column; align-items: center;">
+
+            <button class="key-btn" data-key="i" style="width: 32px; height: 32px; background: linear-gradient(135deg, #78909c 0%, #607d8b 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">&#8593;</button>
+
+            <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">I</span>
+
+          </div>
+
+          <div style="display: flex; flex-direction: row; gap: 12px; align-items: center;">
+
+            <div style="display: flex; flex-direction: column; align-items: center;">
+
+              <button class="key-btn" data-key="j" style="width: 32px; height: 32px; background: linear-gradient(135deg, #78909c 0%, #607d8b 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">&#8592;</button>
+
+              <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">J</span>
+
+            </div>
+
+            <div style="width: 32px; height: 32px;"></div>
+
+            <div style="display: flex; flex-direction: column; align-items: center;">
+
+              <button class="key-btn" data-key="l" style="width: 32px; height: 32px; background: linear-gradient(135deg, #78909c 0%, #607d8b 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">&#8594;</button>
+
+              <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">L</span>
+
+            </div>
+
+          </div>
+
+          <div style="display: flex; flex-direction: column; align-items: center;">
+
+            <button class="key-btn" data-key="k" style="width: 32px; height: 32px; background: linear-gradient(135deg, #78909c 0%, #607d8b 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">&#8595;</button>
+
+            <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">K</span>
+
+          </div>
+
+        </div>
+
+        <div style="display: flex; flex-direction: row; gap: 16px; align-items: center; margin-top: 8px;">
+
+          <div style="display: flex; flex-direction: column; align-items: center;">
+
+            <button class="key-btn" data-key="u" style="width: 36px; height: 28px; background: linear-gradient(135deg, #ab47bc 0%, #9c27b0 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">Z+</button>
+
+            <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">U</span>
+
+          </div>
+
+          <div style="display: flex; flex-direction: column; align-items: center;">
+
+            <button class="key-btn" data-key="o" style="width: 36px; height: 28px; background: linear-gradient(135deg, #ab47bc 0%, #9c27b0 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">Z-</button>
+
+            <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">O</span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div style="font-size: 0.7rem; color: #aed581; font-weight: 500; margin-bottom: 3px; text-align: center;">Zoom</div>
+
+      <div style="display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-bottom: 12px;">
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+
+          <button class="key-btn" data-key="+" style="width: 40px; height: 28px; background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">+</button>
+
+          <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">In</span>
+
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+
+          <button class="key-btn" data-key="-" style="width: 40px; height: 28px; background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">-</button>
+
+          <span style="font-size: 0.6rem; color: #b0b0c0; margin-top: 2px;">Out</span>
+
+        </div>
+
+      </div>
+
+      <div style="font-size: 0.7rem; color: #b39ddb; font-weight: 500; margin-bottom: 3px; text-align: center;">Modes</div>
+
+      <div style="display: flex; flex-direction: row; gap: 4px; justify-content: center; margin-bottom: 8px;">
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+
+          <button class="key-btn" data-key="v" style="width: 28px; height: 28px; background: linear-gradient(135deg, #9575cd 0%, #7e57c2 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">V</button>
+
+          <span style="font-size: 0.55rem; color: #b0b0c0; margin-top: 1px; text-align: center;">View</span>
+
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+
+          <button class="key-btn" data-key="f" style="width: 28px; height: 28px; background: linear-gradient(135deg, #9575cd 0%, #7e57c2 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">F</button>
+
+          <span style="font-size: 0.55rem; color: #b0b0c0; margin-top: 1px; text-align: center;">Shade</span>
+
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+
+          <button class="key-btn" data-key="b" style="width: 28px; height: 28px; background: linear-gradient(135deg, #9575cd 0%, #7e57c2 100%); border: none; border-radius: 4px; color: #fff; font-size: 0.65rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center;">B</button>
+
+          <span style="font-size: 0.55rem; color: #b0b0c0; margin-top: 1px; text-align: center;">Cyl</span>
+
+        </div>
+
+      </div>
+
+      <div style="font-size: 0.6rem; color: #888; text-align: center; line-height: 1.2; margin-top: auto;">
+        Mouse: Drag to rotate • Wheel: Zoom
+      </div>
+
+    </div>
+  </div>
+
+  <div id="gameover-modal" style="display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #222; color: #fff; padding: 32px 24px; border-radius: 10px; box-shadow: 0 4px 32px #000a; text-align: center; min-width: 220px;">
+      <div style="font-size: 2rem; font-weight: bold; margin-bottom: 18px;">Game Over</div>
+      <button id="restart-btn" style="font-size: 1.1rem; padding: 8px 24px; border-radius: 6px; border: none; background: #64b5f6; color: #222; cursor: pointer; font-weight: bold;">Restart</button>
+    </div>
+  </div>
+
   <script src="js/gl-matrix/gl-matrix-min.js"></script>
   <script type="module" src="js/main.js"></script>
+  <script>
+    let allBtns = document.querySelectorAll('.key-btn')
+    let btnMap = {}
+    allBtns.forEach(function(btn) {
+      let k = btn.getAttribute('data-key')
+      btnMap[k] = btn
+      btn.addEventListener('mouseenter', function() {
+        if (!this.classList.contains('pressed')) {
+          this.style.transform = 'translateY(-1px)'
+          this.style.filter = 'brightness(1.1)'
+        }
+      })
+      btn.addEventListener('mouseleave', function() {
+        if (!this.classList.contains('pressed')) {
+          this.style.transform = 'translateY(0)'
+          this.style.filter = 'brightness(1)'
+        }
+      })
+    })
+    window.addEventListener('keydown', function(e) {
+      let key = e.key
+      if (key === ' ') { key = ' ' }
+      if (btnMap[key]) {
+        btnMap[key].classList.add('pressed')
+        btnMap[key].style.background = 'linear-gradient(135deg, #fff 0%, #f0f0f0 100%)'
+        btnMap[key].style.color = '#333'
+        btnMap[key].style.transform = 'translateY(1px)'
+        btnMap[key].style.filter = 'brightness(1)'
+      }
+    })
+    window.addEventListener('keyup', function(e) {
+      let key = e.key
+      if (key === ' ') { key = ' ' }
+      if (btnMap[key]) {
+        btnMap[key].classList.remove('pressed')
+        btnMap[key].style.background = ''
+        btnMap[key].style.color = ''
+        btnMap[key].style.transform = ''
+        btnMap[key].style.filter = ''
+      }
+    })
+    // just making the slider thumb look cooler, not default
+    let vibeStyle = document.createElement('style')
+    vibeStyle.textContent = `
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(100, 181, 246, 0.4);
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 1px 3px rgba(100, 181, 246, 0.4);
+      }
+    `
+    document.head.appendChild(vibeStyle)
+  </script>
 </body>
 
 </html> 
